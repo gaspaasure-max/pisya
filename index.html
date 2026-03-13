@@ -376,6 +376,18 @@
             tg.setBackgroundColor('bg_color');
         }
 
+        // Вычисляем полупрозрачный фон из реального цвета темы
+        (function() {
+            const raw = getComputedStyle(document.documentElement).getPropertyValue('--tg-theme-bg-color').trim();
+            if (!raw) return;
+            const hex = raw.replace('#', '');
+            if (hex.length < 6) return;
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            document.documentElement.style.setProperty('--bg-translucent', `rgba(${r},${g},${b},0.85)`);
+        })();
+
         function haptic(type) {
             if (tg && tg.HapticFeedback) {
                 if (type === 'light') tg.HapticFeedback.impactOccurred('light');
