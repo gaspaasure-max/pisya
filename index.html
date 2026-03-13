@@ -51,16 +51,12 @@
             border-radius: 24px;
             position: relative;
             overflow: hidden;
+            margin: 8px 12px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
-
-        .profile-bg {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(35,139,218,1) 0%, rgba(46,104,163,0.45) 100%);
-            z-index: 0;
-        }
-
-        .profile-widget > *:not(.profile-bg) { position: relative; z-index: 1; }
 
         .avatar {
             border-radius: 50%;
@@ -84,13 +80,13 @@
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 6px;
-            color: #fff;
+            color: var(--text);
             line-height: 1.3;
         }
 
         .profile-date {
             font-size: 15px;
-            color: rgba(255,255,255,0.6);
+            color: var(--hint);
             line-height: 1.4;
         }
 
@@ -446,7 +442,6 @@
 
             app.innerHTML = `
                 <div class="profile-widget">
-                    <div class="profile-bg"></div>
                     <div class="avatar avatar-large ${avatarColorClass(seller.full_name)}">${escapeHtml(getInitial(seller.full_name))}</div>
                     <div class="profile-name">${escapeHtml(seller.full_name)}</div>
                     <div class="profile-date">${seller.registrationDate ? 'Зарегистрирован(а) ' + escapeHtml(seller.registrationDate) : ''}</div>
