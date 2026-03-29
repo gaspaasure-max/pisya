@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Возврат средств</title>
+    <title>Reviews</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -19,6 +19,8 @@
             --header-bg: var(--tg-theme-header-bg-color, #282e33);
             --section-bg: var(--tg-theme-section-bg-color, #282e33);
             --subtitle: var(--tg-theme-subtitle-text-color, #82868a);
+            --good: #31a357;
+            --bad: #ff5252;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,6 +31,7 @@
             color: var(--text);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
             min-height: 100vh;
         }
 
@@ -37,38 +40,39 @@
             margin: 0 auto;
         }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ===== HEADER ===== */
-        .header-widget {
+        /* ===== PROFILE ===== */
+        .profile-widget {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 32px 16px 28px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin: 8px 12px 8;
+            background: transparent;
             background: var(--secondary-bg);
-            animation: fadeInUp 0.3s ease both;
         }
 
-        .header-icon {
-            width: 72px;
-            height: 72px;
+        .avatar {
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            margin-bottom: 14px;
+            color: #fff;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .avatar-large {
+            width: 80px;
+            height: 80px;
+            font-size: 36px;
+            margin-bottom: 12px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         }
 
-        .icon-rub  { background: linear-gradient(135deg, #53edd6 0%, #28c9b7 100%); }
-        .icon-xtr  { background: linear-gradient(135deg, #ffcd6a 0%, #ffa85c 100%); }
-
-        .header-title {
+        .profile-name {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 6px;
@@ -76,158 +80,320 @@
             line-height: 1.3;
         }
 
-        .header-subtitle {
+        .profile-date {
             font-size: 15px;
             color: var(--hint);
             line-height: 1.4;
         }
 
-        /* ===== XTR NOTE ===== */
-        .xtr-note {
-            font-size: 15px;
-            color: var(--subtitle);
-            line-height: 1.55;
-            padding: 20px 20px 4px;
-            text-align: center;
-            animation: fadeInUp 0.3s ease 0.08s both;
+        /* ===== STICKY TABS ===== */
+        .tabs-container {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            min-width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--section-separator);
+            background: color-mix(in srgb, var(--secondary-bg) 85%, transparent);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
-        /* ===== FORM ===== */
-        .form-section {
-            padding: 20px 16px 0;
-            animation: fadeInUp 0.3s ease 0.1s both;
-        }
-
-        .field-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--hint);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            padding: 0 4px 7px;
-        }
-
-        .field-group {
-            background: var(--secondary-bg);
-            border-radius: 12px;
-            margin-bottom: 16px;
-            overflow: hidden;
-        }
-
-        .field-input {
-            width: 100%;
-            padding: 13px 16px;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text);
-            font-size: 16px;
-            font-family: inherit;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .field-input::placeholder {
-            color: var(--hint);
-        }
-
-        .field-divider {
-            height: 1px;
-            background: var(--section-separator);
-            margin: 0 16px;
-        }
-
-        .error-msg {
-            font-size: 13px;
-            color: #ff5252;
-            padding: 3px 4px 10px;
-            display: none;
-        }
-
-        /* ===== SUBMIT ===== */
-        .submit-wrap {
-            padding: 8px 16px 32px;
-            animation: fadeInUp 0.3s ease 0.18s both;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--button);
-            color: var(--button-text);
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: inherit;
+        .tab {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 13px 8px;
             cursor: pointer;
-            transition: transform 0.15s, opacity 0.15s;
+            position: relative;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--hint);
+            transition: color 0.2s ease, opacity 0.15s ease;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        .submit-btn:active  { transform: scale(0.97); opacity: 0.8; }
-        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-        /* ===== SUCCESS OVERLAY ===== */
-        .overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: var(--bg);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 32px 24px;
+            user-select: none;
+            white-space: nowrap;
             text-align: center;
-            z-index: 100;
         }
 
-        .overlay.visible {
-            display: flex;
-            animation: fadeInUp 0.3s ease both;
+        .tab:active { opacity: 0.7; }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 2px 2px 0 0;
+            background: transparent;
+            transition: background-color 0.25s ease;
         }
 
-        .overlay-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6dd98e 0%, #35c759 100%);
+        .tab.active { color: var(--text); }
+        .tab[data-tab="all"].active::after { background-color: var(--button); }
+        .tab[data-tab="positive"].active::after { background-color: var(--good); }
+        .tab[data-tab="negative"].active::after { background-color: var(--bad); }
+
+        .tab-thumb {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         }
 
-        .overlay-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text);
+        .tab-thumb svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ===== REVIEWS LIST ===== */
+        .reviews-list {
+            list-style: none;
+            padding-bottom: 72px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .review-item {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            padding: 0 16px;
+            animation: fadeInUp 0.3s ease both;
+            contain: content;
+        }
+
+        .review-avatar-col {
+            display: flex;
+            flex-shrink: 0;
+            padding: 12px 0;
+            align-items: flex-start;
+        }
+
+        .review-avatar {
+            width: 42px;
+            height: 42px;
+            font-size: 18px;
+        }
+
+        .review-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            padding: 12px 0;
+            gap: 3px;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .review-item:not(:first-child) .review-content {
+            position: relative;
+        }
+        .review-item:not(:first-child) .review-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--section-separator);
+            transform: scaleY(0.5);
+            transform-origin: top;
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .review-username {
+            font-size: 16px;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             line-height: 1.3;
         }
 
-        .overlay-text {
+        .review-status {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .review-status svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .review-text {
             font-size: 15px;
             color: var(--subtitle);
-            line-height: 1.55;
+            line-height: 1.45;
+            word-break: break-word;
         }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 56px 16px;
+            color: var(--hint);
+            font-size: 15px;
+            animation: fadeInUp 0.3s ease both;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        /* ===== AVATAR COLORS ===== */
+        .avatar-color-0 { background: linear-gradient(135deg, #72d5fd 0%, #2a9ef1 100%); }
+        .avatar-color-1 { background: linear-gradient(135deg, #e0a2f3 0%, #d669ed 100%); }
+        .avatar-color-2 { background: linear-gradient(135deg, #82b1ff 0%, #665fff 100%); }
+        .avatar-color-3 { background: linear-gradient(135deg, #ffcd6a 0%, #ffa85c 100%); }
+        .avatar-color-4 { background: linear-gradient(135deg, #6dd98e 0%, #35c759 100%); }
+        .avatar-color-5 { background: linear-gradient(135deg, #ff8a8a 0%, #e85656 100%); }
+        .avatar-color-6 { background: linear-gradient(135deg, #53edd6 0%, #28c9b7 100%); }
 
         /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+        /* ===== INPUT BAR ===== */
+        .input-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            padding: 10px 12px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: color-mix(in srgb, var(--secondary-bg) 85%, transparent);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+        }
+        .tg-icon svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+        .input-wrap {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px 40px 10px 16px;
+            border-radius: 22px;
+            border: none;
+            outline: none;
+            background: color-mix(in srgb, var(--bg) 60%, transparent);
+            color: var(--text);
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .input-field::placeholder {
+            color: var(--hint);
+        }
+        .send-btn {
+            position: absolute;
+            right: -4px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 3px solid color-mix(in srgb, var(--secondary-bg) 85%, transparent);
+            background: var(--button);
+            color: var(--button-text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, opacity 0.15s;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .send-btn:active {
+            transform: scale(0.9);
+            opacity: 0.8;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: color-mix(in srgb, var(--secondary-bg) 85%, transparent);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: var(--text);
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
     <div class="app" id="app"></div>
 
-    <!-- Success overlay -->
-    <div class="overlay" id="successOverlay">
-        <div class="overlay-icon">✅</div>
-        <div class="overlay-title">Заявка отправлена</div>
-        <div class="overlay-text">Возврат средств оформлен.<br>Ожидание в течении 24х часов после отправки.</div>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm0 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 2 0v4Z" fill="#ff9800"/></svg>
+        <span>Отзывы доступны после покупки</span>
+    </div>
+
+    <!-- Нижняя панель ввода -->
+    <div class="input-bar">
+        <div class="input-wrap">
+            <input type="text" class="input-field" placeholder="Написать отзыв...">
+            <button class="send-btn" type="button">
+                <span class="tg-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M3.51 11.37l16.76-7.07c.75-.32 1.52.34 1.3 1.13l-3.39 12.34c-.23.83-1.23 1.08-1.82.46l-3.04-3.21-1.66 2.03c-.36.44-1.07.2-1.07-.36v-3.4L3.8 13.1c-.82-.18-.89-1.34-.08-1.63l-.21-.1Z" fill="currentColor"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
     </div>
 
     <script>
@@ -241,85 +407,167 @@
 
         function haptic(type) {
             if (tg && tg.HapticFeedback) {
-                if (type === 'light')  tg.HapticFeedback.impactOccurred('light');
-                if (type === 'error')  tg.HapticFeedback.notificationOccurred('error');
-                if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+                if (type === 'light') tg.HapticFeedback.impactOccurred('light');
+                else if (type === 'select') tg.HapticFeedback.selectionChanged();
+                else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
             }
         }
 
-        const params   = new URLSearchParams(window.location.search);
-        const currency = params.get('currency') || '';
-        const orderId  = params.get('order_id') || '';
-        const isXtr    = currency === 'XTR';
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            haptic('error');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
 
-        const currencyLabel = isXtr ? '⭐ Telegram Stars' : (currency || 'RUB');
+        document.querySelector('.send-btn').addEventListener('click', () => {
+            showToast();
+            document.querySelector('.input-field').focus();
+        });
+        document.querySelector('.input-field').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') showToast();
+        });
 
-        document.getElementById('app').innerHTML = `
-            <div class="header-widget">
-                <div class="header-icon ${isXtr ? 'icon-xtr' : 'icon-rub'}">${isXtr ? '⭐' : '💳'}</div>
-                <div class="header-title">Оформление возврата</div>
-                <div class="header-subtitle">Заказ #${orderId} &middot; ${currencyLabel}</div>
-            </div>
+        const THUMB_UP = `<svg viewBox="0 0 24 24" fill="none"><path d="M8.32 11.04s-.49.72-1.93.6C5.22 11.53 4.4 14.38 5.01 16.52c.45 1.57 1.38 2.11 2.18 1.91.45-.11 1.09-.25 1.4-.2 2.41.41 3.22-8.79-.27-7.19Z" fill="#31a357"/><path d="M7.84 14.46s-.61-1.81.71-3.75c1.29-1.94 2.49-2.32 2.69-3.15.33-1.32-.36-2.54.46-2.98.9-.5 2.04.51 2.17 2.06.13 1.56-.81 2.49-.69 3.34.12.84 1.49.5 2.69.62 1.47.1 2.47.51 2.77 1.41.2.8.3 1.3 0 1.9-.2.5-.1.7 0 1.2.1.6 0 1.1-.3 1.5-.2.3-.2.4-.1.8.1.7-.3 1.4-1.1 1.5-.5.1-3.6.1-4.3-.1-.9-.2-1.4-.7-1.6-1.4-.1-.8 0-2.5-.1-3.8Z" fill="#31a357"/></svg>`;
 
-            ${isXtr ? `
-                <div class="xtr-note">
-                    Платёж был произведён в Telegram Stars.<br>
-                    Нажмите кнопку, чтобы подать заявку&nbsp;&mdash;<br>
-                    поддержка рассмотрит её в течение 24&nbsp;часов.
-                </div>
-                <div class="submit-wrap" style="padding-top:24px">
-                    <button class="submit-btn" id="submitBtn">Подать заявку</button>
-                </div>
-            ` : `
-                <div class="form-section">
-                    <div class="field-label">Номер карты или телефон (СБП)</div>
-                    <div class="field-group">
-                        <input class="field-input" id="requisites" type="text"
-                            placeholder="4276 1234 5678 9012 или +79001234567"
-                            inputmode="text" autocomplete="off" />
-                    </div>
-                    <div class="error-msg" id="reqError">Введите номер карты или телефон</div>
+        const THUMB_DOWN = `<svg viewBox="0 0 24 24" fill="none" style="transform:scaleY(-1)"><path d="M8.32 11.04s-.49.72-1.93.6C5.22 11.53 4.4 14.38 5.01 16.52c.45 1.57 1.38 2.11 2.18 1.91.45-.11 1.09-.25 1.4-.2 2.41.41 3.22-8.79-.27-7.19Z" fill="#FF5252"/><path d="M7.84 14.46s-.61-1.81.71-3.75c1.29-1.94 2.49-2.32 2.69-3.15.33-1.32-.36-2.54.46-2.98.9-.5 2.04.51 2.17 2.06.13 1.56-.81 2.49-.69 3.34.12.84 1.49.5 2.69.62 1.47.1 2.47.51 2.77 1.41.2.8.3 1.3 0 1.9-.2.5-.1.7 0 1.2.1.6 0 1.1-.3 1.5-.2.3-.2.4-.1.8.1.7-.3 1.4-1.1 1.5-.5.1-3.6.1-4.3-.1-.9-.2-1.4-.7-1.6-1.4-.1-.8 0-2.5-.1-3.8Z" fill="#FF5252"/></svg>`;
 
-                    <div class="field-label">Название банка</div>
-                    <div class="field-group">
-                        <input class="field-input" id="bank" type="text"
-                            placeholder="Сбербанк, Т-Банк, ВТБ..."
-                            autocomplete="off" />
-                    </div>
-                    <div class="error-msg" id="bankError">Введите название банка</div>
-                </div>
-                <div class="submit-wrap">
-                    <button class="submit-btn" id="submitBtn">Отправить заявку</button>
-                </div>
-            `}
-        `;
+        const THUMB_UP_SM = `<svg viewBox="0 0 24 24" fill="none"><path d="M8.32 11.04s-.49.72-1.93.6C5.22 11.53 4.4 14.38 5.01 16.52c.45 1.57 1.38 2.11 2.18 1.91.45-.11 1.09-.25 1.4-.2 2.41.41 3.22-8.79-.27-7.19Z" fill="#31a357"/><path d="M7.84 14.46s-.61-1.81.71-3.75c1.29-1.94 2.49-2.32 2.69-3.15.33-1.32-.36-2.54.46-2.98.9-.5 2.04.51 2.17 2.06.13 1.56-.81 2.49-.69 3.34.12.84 1.49.5 2.69.62 1.47.1 2.47.51 2.77 1.41.2.8.3 1.3 0 1.9-.2.5-.1.7 0 1.2.1.6 0 1.1-.3 1.5-.2.3-.2.4-.1.8.1.7-.3 1.4-1.1 1.5-.5.1-3.6.1-4.3-.1-.9-.2-1.4-.7-1.6-1.4-.1-.8 0-2.5-.1-3.8Z" fill="#31a357"/></svg>`;
 
-        document.getElementById('submitBtn').addEventListener('click', function () {
-            if (!isXtr) {
-                const req     = document.getElementById('requisites').value.trim();
-                const bnk     = document.getElementById('bank').value.trim();
-                const reqErr  = document.getElementById('reqError');
-                const bankErr = document.getElementById('bankError');
-                let valid = true;
+        const THUMB_DOWN_SM = `<svg viewBox="0 0 24 24" fill="none" style="transform:scaleY(-1)"><path d="M8.32 11.04s-.49.72-1.93.6C5.22 11.53 4.4 14.38 5.01 16.52c.45 1.57 1.38 2.11 2.18 1.91.45-.11 1.09-.25 1.4-.2 2.41.41 3.22-8.79-.27-7.19Z" fill="#ff5252"/><path d="M7.84 14.46s-.61-1.81.71-3.75c1.29-1.94 2.49-2.32 2.69-3.15.33-1.32-.36-2.54.46-2.98.9-.5 2.04.51 2.17 2.06.13 1.56-.81 2.49-.69 3.34.12.84 1.49.5 2.69.62 1.47.1 2.47.51 2.77 1.41.2.8.3 1.3 0 1.9-.2.5-.1.7 0 1.2.1.6 0 1.1-.3 1.5-.2.3-.2.4-.1.8.1.7-.3 1.4-1.1 1.5-.5.1-3.6.1-4.3-.1-.9-.2-1.4-.7-1.6-1.4-.1-.8 0-2.5-.1-3.8Z" fill="#ff5252"/></svg>`;
 
-                if (!req) { reqErr.style.display  = 'block'; valid = false; }
-                else        reqErr.style.display  = 'none';
+        function getDataFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const raw = params.get('data');
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch { return null; }
+        }
 
-                if (!bnk) { bankErr.style.display = 'block'; valid = false; }
-                else        bankErr.style.display = 'none';
+        function getInitial(name) {
+            if (!name) return '?';
+            const trimmed = name.trim();
+            if (!trimmed) return '?';
+            const emojiRegex = /^[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u;
+            const match = trimmed.match(emojiRegex);
+            if (match) return match[0];
+            return trimmed[0].toUpperCase();
+        }
 
-                if (!valid) { haptic('error'); return; }
+        function avatarColorClass(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return 'avatar-color-' + (Math.abs(hash) % 7);
+        }
 
-                tg.sendData(JSON.stringify({ order_id: orderId, currency, requisites: req, bank: bnk }));
-            } else {
-                tg.sendData(JSON.stringify({ order_id: orderId, currency: 'XTR' }));
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function render(data) {
+            const app = document.getElementById('app');
+            if (!data) {
+                app.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128196;</div>Нет данных</div>';
+                return;
             }
 
-            this.disabled = true;
-            haptic('success');
-            document.getElementById('successOverlay').classList.add('visible');
-            setTimeout(() => tg.close(), 2500);
-        });
+            const { seller, reviews } = data;
+            const allCount = reviews.length;
+            let positiveCount = 0, negativeCount = 0;
+            for (const r of reviews) {
+                if (r.status === 1) positiveCount++;
+                else if (r.status === 0) negativeCount++;
+            }
+
+            app.innerHTML = `
+                <div class="profile-widget">
+                    <div class="avatar avatar-large ${avatarColorClass(seller.full_name)}">${escapeHtml(getInitial(seller.full_name))}</div>
+                    <div class="profile-name">${escapeHtml(seller.full_name)}</div>
+                    <div class="profile-date">${seller.registrationDate ? 'Зарегистрирован(а) ' + escapeHtml(seller.registrationDate) : ''}</div>
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tab active" data-tab="all">
+                        <span>Все &middot; ${allCount}</span>
+                    </div>
+                    <div class="tab" data-tab="positive">
+                        <span class="tab-thumb">${THUMB_UP}</span>
+                        <span>${positiveCount}</span>
+                    </div>
+                    <div class="tab" data-tab="negative">
+                        <span class="tab-thumb">${THUMB_DOWN}</span>
+                        <span>${negativeCount}</span>
+                    </div>
+                </div>
+
+                <ul class="reviews-list" id="reviewsList"></ul>
+            `;
+
+            let currentFilter = 'all';
+            const tabs = document.querySelectorAll('.tab');
+            const list = document.getElementById('reviewsList');
+
+            function renderReviews(filter) {
+                let filtered = reviews;
+                if (filter === 'positive') filtered = reviews.filter(r => r.status === 1);
+                else if (filter === 'negative') filtered = reviews.filter(r => r.status === 0);
+
+                if (filtered.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128203;</div>Нет отзывов</div>';
+                    return;
+                }
+
+                list.innerHTML = filtered.map((r, i) => {
+                    const initial = getInitial(r.full_name);
+                    const colorCls = avatarColorClass(r.full_name);
+                    const isPositive = r.status === 1;
+                    const statusIcon = isPositive ? THUMB_UP_SM : THUMB_DOWN_SM;
+                    const textHtml = r.text ? `<div class="review-text">${escapeHtml(r.text)}</div>` : '';
+                    const delay = i < 20 ? i * 0.03 : 0;
+
+                    return `
+                        <li class="review-item" style="animation-delay:${delay}s">
+                            <div class="review-avatar-col">
+                                <div class="avatar review-avatar ${colorCls}">${escapeHtml(initial)}</div>
+                            </div>
+                            <div class="review-content">
+                                <div class="review-header">
+                                    <span class="review-username">${escapeHtml(r.full_name)}</span>
+                                    <span class="review-status">${statusIcon}</span>
+                                </div>
+                                ${textHtml}
+                            </div>
+                        </li>
+                    `;
+                }).join('');
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    if (tab.classList.contains('active')) return;
+                    haptic('select');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentFilter = tab.dataset.tab;
+                    list.style.opacity = '0';
+                    list.style.transition = 'opacity 0.15s ease';
+                    setTimeout(() => {
+                        renderReviews(currentFilter);
+                        list.style.opacity = '1';
+                    }, 150);
+                });
+            });
+
+            renderReviews('all');
+        }
+
+        render(getDataFromUrl());
     </script>
 </body>
 </html>
