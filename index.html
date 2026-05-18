@@ -49,8 +49,8 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-            margin: 8px 12px 8;
-            background: transparent;
+            margin: 8px 12px;
+            border-radius: 14px;
             background: var(--secondary-bg);
         }
 
@@ -201,6 +201,7 @@
             top: 0;
             left: 0;
             right: 0;
+            height: 1px;
             background: var(--section-separator);
             transform: scaleY(0.5);
             transform-origin: top;
@@ -240,6 +241,12 @@
             word-break: break-word;
         }
 
+        .review-text.empty {
+            color: var(--hint);
+            font-style: italic;
+            opacity: 0.8;
+        }
+
         /* ===== EMPTY STATE ===== */
         .empty-state {
             display: flex;
@@ -264,8 +271,8 @@
         .avatar-color-2 { background: linear-gradient(135deg, #82b1ff 0%, #665fff 100%); }
         .avatar-color-3 { background: linear-gradient(135deg, #ffcd6a 0%, #ffa85c 100%); }
         .avatar-color-4 { background: linear-gradient(135deg, #6dd98e 0%, #35c759 100%); }
-        .avatar-color-5 { background: linear-gradient(135deg, #ff8a8a 0%, #e85656 100%); }
-        .avatar-color-6 { background: linear-gradient(135deg, #53edd6 0%, #28c9b7 100%); }
+        .avatar-color-5 { background: linear-gradient(135deg, #53edd6 0%, #28c9b7 100%); }
+        .avatar-color-6 { background: linear-gradient(135deg, #b9a3ff 0%, #7e63ff 100%); }
 
         /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar { width: 4px; }
@@ -290,6 +297,16 @@
             display: flex;
             align-items: center;
         }
+        .input-bar::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 100%;
+            height: 16px;
+            background: linear-gradient(to top, color-mix(in srgb, var(--bg) 75%, transparent), transparent);
+            pointer-events: none;
+        }
         .tg-icon svg {
             width: 20px;
             height: 20px;
@@ -303,7 +320,7 @@
         }
         .input-field {
             width: 100%;
-            padding: 10px 40px 10px 16px;
+            padding: 10px 44px 10px 16px;
             border-radius: 22px;
             border: none;
             outline: none;
@@ -317,11 +334,13 @@
         }
         .send-btn {
             position: absolute;
-            right: -4px;
-            width: 42px;
-            height: 42px;
+            right: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 3px solid color-mix(in srgb, var(--secondary-bg) 85%, transparent);
+            border: none;
             background: var(--button);
             color: var(--button-text);
             cursor: pointer;
@@ -334,7 +353,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .send-btn:active {
-            transform: scale(0.9);
+            transform: translateY(-50%) scale(0.9);
             opacity: 0.8;
         }
 
@@ -528,7 +547,9 @@
                     const colorCls = avatarColorClass(r.full_name);
                     const isPositive = r.status === 1;
                     const statusIcon = isPositive ? THUMB_UP_SM : THUMB_DOWN_SM;
-                    const textHtml = r.text ? `<div class="review-text">${escapeHtml(r.text)}</div>` : '';
+                    const textHtml = r.text
+                        ? `<div class="review-text">${escapeHtml(r.text)}</div>`
+                        : `<div class="review-text empty">Без комментария</div>`;
                     const delay = i < 20 ? i * 0.03 : 0;
 
                     return `
